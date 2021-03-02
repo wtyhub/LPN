@@ -17,9 +17,9 @@ import os
 import scipy.io
 import yaml
 import math
-from model import ft_net, two_view_net, three_view_net
+from model import ft_net, two_view_net, three_view_net, three_view_net_test
 from utils import load_network
-from image_folder import customData
+from image_folder import customData, customData_one
 #fp16
 try:
     from apex.fp16_utils import *
@@ -41,9 +41,10 @@ parser.add_argument('--w', default=256, type=int, help='width')
 parser.add_argument('--views', default=2, type=int, help='views')
 parser.add_argument('--pad', default=0, type=int, help='padding')
 parser.add_argument('--use_dense', action='store_true', help='use densenet121' )
-parser.add_argument('--LPN', action='store_true', help='use LPN' )
+parser.add_argument('--PCB', action='store_true', help='use PCB' )
 parser.add_argument('--multi', action='store_true', help='use multiple query' )
 parser.add_argument('--fp16', action='store_true', help='use fp16.' )
+parser.add_argument('--scale_test', action='store_true', help='scale test' )
 parser.add_argument('--ms',default='1', type=str,help='multiple_scale: e.g. 1 1,1.1  1,1.1,1.2')
 
 opt = parser.parse_args()
@@ -57,9 +58,9 @@ opt.use_dense = config['use_dense']
 opt.use_NAS = config['use_NAS']
 opt.stride = config['stride']
 opt.views = config['views']
-opt.LPN = config['LPN']
+opt.PCB = config['PCB']
 opt.block = config['block']
-
+scale_test = opt.scale_test
 if 'h' in config:
     opt.h = config['h']
     opt.w = config['w']
@@ -112,7 +113,7 @@ transform_move_list = transforms.Compose([
         ])
 
 
-if opt.LPN:
+if opt.PCB:
     data_transforms = transforms.Compose([
         # transforms.Resize((384,192), interpolation=3),
         transforms.Resize((opt.h,opt.w), interpolation=3),
@@ -130,16 +131,29 @@ if opt.multi:
 else:
     # image_datasets = {x: datasets.ImageFolder( os.path.join(data_dir,x) ,data_transforms) for x in ['gallery_satellite','gallery_drone', 'gallery_street', 'query_satellite', 'query_drone', 'query_street']}
     image_datasets = {x: datasets.ImageFolder( os.path.join(data_dir,x) ,data_transforms) for x in ['gallery_satellite','gallery_drone', 'gallery_street', 'gallery_satellite_usa_un']}
-    for x in ['query_satellite', 'query_drone', 'query_street']:
-        if opt.pad > 0:
-            print('move pixel test')
-            image_datasets[x] = customData( os.path.join(data_dir,x) ,transform_move_list, rotate=0, pad=opt.pad)
-        else:    
-            image_datasets[x] = customData( os.path.join(data_dir,x) ,data_transforms, rotate=0)
+    # image_datasets = {}
+    # for x in ['gallery_satellite','gallery_drone', 'gallery_street', 'gallery_satellite_usa_un']:
+    #     image_datasets[x] = customData( os.path.join(data_dir,x) ,data_transforms, rotate=0)
+    if scale_test:
+        for x in ['query_drone']:
+            print('----------scale test--------------')
+            image_datasets[x] = customData_one( os.path.join(data_dir,x) ,data_transforms, rotate=0, reverse=False)
+    else:
+        for x in ['query_satellite', 'query_drone', 'query_street', 'query_drone_one']:
+            if opt.pad > 0:
+                print('-----------move pixel test-----------')
+                image_datasets[x] = customData( os.path.join(data_dir,x) ,transform_move_list, rotate=0, pad=opt.pad)
+            else: 
+                print('----------rotation test--------------')   
+                image_datasets[x] = customData( os.path.join(data_dir,x) ,data_transforms, rotate=0)
     print(image_datasets.keys())
     # image_datasets = {x: customData( os.path.join(data_dir,x) ,data_transforms, rotate=0) for x in ['query_satellite', 'query_drone', 'query_street']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=opt.batchsize,
-                                             shuffle=False, num_workers=16) for x in ['gallery_satellite', 'gallery_drone','gallery_street', 'gallery_satellite_usa_un', 'query_satellite', 'query_drone', 'query_street']}
+    if scale_test:
+        dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=opt.batchsize,
+                                             shuffle=False, num_workers=16) for x in ['gallery_satellite', 'gallery_drone','gallery_street', 'gallery_satellite_usa_un', 'query_drone']}
+    else:
+        dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=opt.batchsize,
+                                             shuffle=False, num_workers=16) for x in ['gallery_satellite', 'gallery_drone','gallery_street', 'gallery_satellite_usa_un', 'query_satellite', 'query_drone', 'query_street', 'query_drone_one']}
 use_gpu = torch.cuda.is_available()
 
 ######################################################################
@@ -174,7 +188,7 @@ def extract_feature(model,dataloaders, view_index = 1):
         count += n
         print(count)
         ff = torch.FloatTensor(n,512).zero_().cuda()
-        if opt.LPN:
+        if opt.PCB:
             # ff = torch.FloatTensor(n,2048,6).zero_().cuda()
             ff = torch.FloatTensor(n,512,opt.block).zero_().cuda()
         for i in range(2):
@@ -199,7 +213,7 @@ def extract_feature(model,dataloaders, view_index = 1):
                         _, _, outputs = model(None, None, input_img)
                 ff += outputs
         # norm feature
-        if opt.LPN:
+        if opt.PCB:
             # feature size (n,2048,6)
             # 1. To treat every part equally, I calculate the norm for every 2048-dim part feature.
             # 2. To keep the cosine score==1, sqrt(6) is added to norm the whole feature (2048*6).
@@ -218,6 +232,7 @@ def get_id(img_path):
     labels = []
     paths = []
     for path, v in img_path:
+        # print(path, v)
         folder_name = os.path.basename(os.path.dirname(path))
         labels.append(int(folder_name))
         paths.append(path)
@@ -228,8 +243,8 @@ def get_id(img_path):
 print('-------test-----------')
 
 model, _, epoch = load_network(opt.name, opt)
-if opt.LPN:
-    print('use LPN')
+if opt.PCB:
+    print('use PCB')
     # model = three_view_net_test(model)
     for i in range(opt.block):
         cls_name = 'classifier'+str(i)
@@ -252,6 +267,7 @@ gallery_name = 'gallery_satellite'
 
 #gallery_name = 'gallery_street'
 query_name = 'query_drone'
+# query_name = 'query_drone_one'
 # gallery_name = 'gallery_drone'
 # gallery_name = 'gallery_satellite_usa_un'
 which_gallery = which_view(gallery_name)
