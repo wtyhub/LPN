@@ -13,3 +13,17 @@
 
 ## Prerequisites
 
+- Python 3.6
+- GPU Memory >= 8G
+- Numpy > 1.12.1
+- Pytorch 0.3+
+- scipy == 1.2.1
+- [Optional] apex (for float16) 
+
+## Getting started
+### Dataset & Preparation
+Download [University-1652] upon request. You may use the request [template](https://github.com/layumi/University1652-Baseline/blob/master/Request.md).
+
+Or download [CVUSA](http://cs.uky.edu/~jacobs/datasets/cvusa/) / [CVACT](https://github.com/Liumouliu/OriCNN). 
+
+For CVUSA, I follow the training/test split in (https://github.com/Liumouliu/OriCNN). 
