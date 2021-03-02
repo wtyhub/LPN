@@ -36,7 +36,7 @@ valIdList = []
 for k in range(valNum):
     valList.append(id_alllist[val_inds[k][0]])
     valIdList.append(k)
-'''
+
 # prepare training set
 print('begin to prepare train')
 d_train_dir = '/home/wangtyu/datasets/CVACT/train'
@@ -85,7 +85,7 @@ for m in range(trainNum):
             f.writelines(id_alllist[training_inds[m][0]])
             f.write('\n###################################')
     print(m)
-'''  
+ 
 #prepare val set
 print('begin to prepare val')
 d_val_dir = '/home/wangtyu/datasets/CVACT/val'
