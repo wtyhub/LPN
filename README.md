@@ -18,11 +18,11 @@
 - Numpy > 1.12.1
 - Pytorch 0.3+
 - scipy == 1.2.1
-- [Optional] apex (for float16) 
+- [Optional] apex (for float16) [Requirements](https://github.com/NVIDIA/apex#requirements) & [Quick Start](https://github.com/NVIDIA/apex#quick-start)
 
 ## Getting started
 ### Dataset & Preparation
-Download [University-1652] upon request. You may use the request [template](https://github.com/layumi/University1652-Baseline/blob/master/Request.md).
+Download [University-1652](https://github.com/layumi/University1652-Baseline) upon request. You may use the request [template](https://github.com/layumi/University1652-Baseline/blob/master/Request.md).
 
 Or download [CVUSA](http://cs.uky.edu/~jacobs/datasets/cvusa/) / [CVACT](https://github.com/Liumouliu/OriCNN). 
 
