@@ -17,7 +17,7 @@ import os
 import scipy.io
 import yaml
 import math
-from model import ft_net, two_view_net, three_view_net, three_view_net_test
+from model import ft_net, two_view_net, three_view_net
 from utils import load_network
 from image_folder import customData, customData_one
 #fp16
