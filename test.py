@@ -41,7 +41,7 @@ parser.add_argument('--w', default=256, type=int, help='width')
 parser.add_argument('--views', default=2, type=int, help='views')
 parser.add_argument('--pad', default=0, type=int, help='padding')
 parser.add_argument('--use_dense', action='store_true', help='use densenet121' )
-parser.add_argument('--PCB', action='store_true', help='use PCB' )
+parser.add_argument('--LPN', action='store_true', help='use LPN' )
 parser.add_argument('--multi', action='store_true', help='use multiple query' )
 parser.add_argument('--fp16', action='store_true', help='use fp16.' )
 parser.add_argument('--scale_test', action='store_true', help='scale test' )
@@ -58,7 +58,7 @@ opt.use_dense = config['use_dense']
 opt.use_NAS = config['use_NAS']
 opt.stride = config['stride']
 opt.views = config['views']
-opt.PCB = config['PCB']
+opt.LPN = config['LPN']
 opt.block = config['block']
 scale_test = opt.scale_test
 if 'h' in config:
@@ -113,7 +113,7 @@ transform_move_list = transforms.Compose([
         ])
 
 
-if opt.PCB:
+if opt.LPN:
     data_transforms = transforms.Compose([
         # transforms.Resize((384,192), interpolation=3),
         transforms.Resize((opt.h,opt.w), interpolation=3),
@@ -188,7 +188,7 @@ def extract_feature(model,dataloaders, view_index = 1):
         count += n
         print(count)
         ff = torch.FloatTensor(n,512).zero_().cuda()
-        if opt.PCB:
+        if opt.LPN:
             # ff = torch.FloatTensor(n,2048,6).zero_().cuda()
             ff = torch.FloatTensor(n,512,opt.block).zero_().cuda()
         for i in range(2):
@@ -213,7 +213,7 @@ def extract_feature(model,dataloaders, view_index = 1):
                         _, _, outputs = model(None, None, input_img)
                 ff += outputs
         # norm feature
-        if opt.PCB:
+        if opt.LPN:
             # feature size (n,2048,6)
             # 1. To treat every part equally, I calculate the norm for every 2048-dim part feature.
             # 2. To keep the cosine score==1, sqrt(6) is added to norm the whole feature (2048*6).
@@ -243,8 +243,8 @@ def get_id(img_path):
 print('-------test-----------')
 
 model, _, epoch = load_network(opt.name, opt)
-if opt.PCB:
-    print('use PCB')
+if opt.LPN:
+    print('use LPN')
     # model = three_view_net_test(model)
     for i in range(opt.block):
         cls_name = 'classifier'+str(i)
