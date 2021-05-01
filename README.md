@@ -10,7 +10,7 @@
 [[Paper]](https://arxiv.org/abs/2008.11646) 
 
 ## NEWs
-
+We upload the codes of [SAFA+ours](https://github.com/wtyhub/SAFA_LPN.git) and [CVFT+ours](https://github.com/wtyhub/CVFT_LPN.git)
 ## Prerequisites
 
 - Python 3.6
