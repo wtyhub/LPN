@@ -46,15 +46,15 @@ sh run_cvact.sh
 ## Citation
 
 ```bibtex
-@article{wang2021LPN,
-  title={Each Part Matters: Local Patterns Facilitate Cross-view Geo-localization},
-  author={Wang, Tingyu and Zheng, Zhedong and Yan, Chenggang and Zhang, jiyong and Sun, Yaoqi and Zheng, Bolun and Yang, Yi},
-  journal={IEEE Transactions on Circuits and Systems for Video Technology},
-  year={2021},
-  publisher={IEEE},
-  note={doi:{
-    \href{http://dx.doi.org/10.1109/TCSVT.2021.3061265}{10.1109/TCSVT.2021.3061265}}}
-}
+@ARTICLE{wang2021LPN,
+  title={Each Part Matters: Local Patterns Facilitate Cross-View Geo-Localization}, 
+  author={Wang, Tingyu and Zheng, Zhedong and Yan, Chenggang and Zhang, Jiyong and Sun, Yaoqi and Zheng, Bolun and Yang, Yi},
+  journal={IEEE Transactions on Circuits and Systems for Video Technology}, 
+  year={2022},
+  volume={32},
+  number={2},
+  pages={867-879},
+  doi={10.1109/TCSVT.2021.3061265}}
 ```
 ```bibtex
 @article{zheng2020university,
