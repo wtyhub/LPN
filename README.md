@@ -7,7 +7,8 @@
 
 
 ## LPN
-[[Paper]](https://arxiv.org/abs/2008.11646) 
+[[Paper]](https://arxiv.org/abs/2008.11646) [[中文解读]](https://zhuanlan.zhihu.com/p/365043015)
+
 
 ## NEWs
 We upload the codes of [SAFA+ours](https://github.com/wtyhub/SAFA_LPN.git) and [CVFT+ours](https://github.com/wtyhub/CVFT_LPN.git)
